@@ -330,10 +330,15 @@
 
       try {
         if (reader && typeof reader.find === 'function') {
-          // Capture the full RS client
-          const img = (typeof a1lib !== 'undefined' && a1lib.captureHoldFullRs)
-            ? a1lib.captureHoldFullRs()
-            : null;
+          // Capture – try several common ways the library exposes it
+          let img = null;
+          if (typeof a1lib !== 'undefined') {
+            if (a1lib.captureHoldFullRs) img = a1lib.captureHoldFullRs();
+            else if (a1lib.captureHold) img = a1lib.captureHold(0, 0, alt1.rsWidth, alt1.rsHeight);
+          }
+          if (!img && window.alt1 && alt1.captureHoldFullRs) {
+            img = alt1.captureHoldFullRs();
+          }
 
           if (!reader.pos) {
             const pos = reader.find(img);
@@ -353,18 +358,47 @@
           }
         }
       } catch (err) {
-        // avoid spamming the log
+        // log occasional errors so we can see them
+        if (Math.random() < 0.05) log('tick err: ' + (err.message || err), 'info');
       }
     }
 
+    function clean(str) {
+      return (str || '')
+        .toString()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')   // strip punctuation
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    let lastLogged = '';
     function processLines(lines) {
       for (const line of lines) {
-        const text = (line.text || line || '').toString().toLowerCase();
-        if (!text || text.length < 5) continue;
+        // ChatBoxReader usually returns objects with a .text property
+        // but sometimes the structure is different, so we try a few paths
+        let raw = '';
+        if (typeof line === 'string') raw = line;
+        else if (line && line.text) raw = line.text;
+        else if (line && line.fragments) {
+          raw = line.fragments.map(f => f.text || '').join('');
+        } else {
+          raw = JSON.stringify(line);
+        }
+
+        const text = clean(raw);
+        if (!text || text.length < 4) continue;
+
+        // Debug: show the most recent interesting line (rate-limited)
+        if (text !== lastLogged && text.length > 8) {
+          lastLogged = text;
+          log('READ: ' + text.slice(0, 70), 'info');
+        }
 
         for (const [id, cue] of Object.entries(CUES)) {
           for (const trig of cue.triggers) {
-            if (text.includes(trig)) {
+            const t = clean(trig);
+            if (t && text.includes(t)) {
               showBanner(id);
               return;
             }
