@@ -252,21 +252,19 @@
         alt1.overLayClearGroup('zamcue');
         alt1.overLaySetGroup('zamcue');
 
-        const [r, g, b] = cue.color;
-        const col = (r << 16) | (g << 8) | b;
-
-        // Place banner higher and bigger so it’s hard to miss
+        // Dead centre of the game client
         const cx = Math.round(alt1.rsWidth / 2);
-        const cy = Math.round(alt1.rsHeight * 0.15);
+        const cy = Math.round(alt1.rsHeight / 2);
 
-        // Big title
-        alt1.overLayTextEx(cue.title, col, 48, cx, cy, 6000, '', true, true);
-        // Instruction
-        alt1.overLayTextEx(cue.text, 0xFFFFFF, 22, cx, cy + 55, 6000, '', true, true);
-        // Thick coloured bar behind
-        alt1.overLayRect(col, cx - 320, cy - 35, 640, 120, 6000, 6);
+        // Try two rect styles – some clients only render certain ones
+        alt1.overLayRect(0xFF0000, cx - 310, cy - 70, 620, 120, 6000, 8);
+        alt1.overLayRect(0xFFFF00, cx - 305, cy - 65, 610, 110, 6000, 3);
 
-        log('BANNER → ' + cue.title, 'hit');
+        // Large high-contrast text
+        alt1.overLayTextEx(cue.title, 0xFFFF00, 42, cx, cy - 25, 6000, '', true, true);
+        alt1.overLayTextEx(cue.text, 0xFFFFFF, 22, cx, cy + 25, 6000, '', true, true);
+
+        log('BANNER → ' + cue.title + ' at ' + cx + ',' + cy, 'hit');
       } catch (e) {
         log('Banner overlay error: ' + (e.message || e), 'info');
       }
@@ -348,7 +346,7 @@
       if (pollTimer) clearInterval(pollTimer);
       pollTimer = setInterval(tick, 350);
       setStatus('Auto ON – looking for chat…', 'warn');
-      log('Auto-read started (v5 – bigger banners)');
+      log('Auto-read started (v8 – double rects)');
     }
 
     function stopAuto() {
@@ -395,10 +393,11 @@
                 if (r) {
                   alt1.overLayClearGroup('zamcue-chat');
                   alt1.overLaySetGroup('zamcue-chat');
-                  // Thick bright green border + label for 8 seconds
-                  alt1.overLayRect(0x00FF00, r.x, r.y, r.width, r.height, 8000, 8);
-                  alt1.overLayTextEx('CHAT DETECTED', 0x00FF00, 22,
-                    r.x + Math.floor(r.width / 2), r.y - 18, 8000, '', true, true);
+                  // Try multiple styles for the chat highlight
+                  alt1.overLayRect(0x00FF00, r.x, r.y, r.width, r.height, 8000, 6);
+                  alt1.overLayRect(0x00FF00, r.x - 2, r.y - 2, r.width + 4, r.height + 4, 8000, 2);
+                  alt1.overLayTextEx('CHAT DETECTED', 0x00FF00, 20,
+                    r.x + Math.floor(r.width / 2), r.y - 16, 8000, '', true, true);
                   log('Highlighted chat box at ' + r.x + ',' + r.y + ' ' + r.width + 'x' + r.height, 'info');
                 } else {
                   log('Chat found but no rect. keys: ' + Object.keys(reader.pos).join(','), 'info');
