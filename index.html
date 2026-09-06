@@ -159,35 +159,35 @@
         text: "Freedom / Anticipation → Stun Zamorak",
         color: [220, 38, 38],
         duration: 4000,
-        triggers: ["i will tear you asunder"]
+        triggers: ["will tear you", "i will tear you asunder"]
       },
       slam: {
         title: "SLAM – DEBILITATE",
         text: "Pray Melee · Walk under · Debilitate",
         color: [234, 88, 12],
         duration: 5000,
-        triggers: ["this world will burn"]
+        triggers: ["world will burn", "this world will burn"]
       },
       cage: {
         title: "CAGE – PRAY MAGE",
         text: "Pray Mage · Debilitate or Devotion",
         color: [124, 58, 237],
         duration: 5000,
-        triggers: ["chaos, unfettered"]
+        triggers: ["chaos, unfettered", "chaos unfettered"]
       },
       curl: {
         title: "CURL UP – RESONATE",
         text: "Equip shield · Resonate the hit",
         color: [37, 99, 235],
         duration: 5000,
-        triggers: ["feel the rage of a god"]
+        triggers: ["feel the rage of a god", "rage of a god"]
       },
       infernus: {
         title: "INFERNUS",
         text: "Match rune → Stun Zammy → Finish demon\n(500%+: all on rune together)",
         color: [180, 83, 9],
         duration: 7000,
-        triggers: ["step into the dark"]
+        triggers: ["into the dark", "step into the dark"]
       },
       channel: {
         title: "CHANNELER / WITCH",
@@ -201,7 +201,7 @@
         text: "Anticipate / Freedom over black smoke",
         color: [5, 150, 105],
         duration: 4500,
-        triggers: ["you're already dead", "youre already dead"]
+        triggers: ["already dead", "you're already dead", "youre already dead"]
       },
       def: {
         title: "DEFENSIVE",
@@ -299,10 +299,24 @@
       // Try to create the official ChatBoxReader
       if (!reader) {
         try {
-          // UMD build typically exposes as window.Chatbox
           const CB = window.Chatbox && (window.Chatbox.default || window.Chatbox);
           if (CB) {
             reader = new CB();
+
+            // Exact colours used by the working Zamorak Spec Tracker
+            if (typeof a1lib !== 'undefined' && a1lib.mixColor) {
+              reader.readargs = reader.readargs || {};
+              reader.readargs.colors = [
+                a1lib.mixColor(153, 255, 153), // Green (Zamorak's voice)
+                a1lib.mixColor(232, 4, 4),     // Red (Zamorak)
+                a1lib.mixColor(255, 255, 255), // White
+                a1lib.mixColor(127, 169, 255), // Timestamp blue
+                a1lib.mixColor(255, 0, 0),
+                a1lib.mixColor(255, 255, 0)
+              ];
+              log('Zamorak colours loaded (green + red)', 'info');
+            }
+
             log('ChatBoxReader created', 'info');
           } else {
             log('ChatBoxReader global not found – using limited mode', 'info');
