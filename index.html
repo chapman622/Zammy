@@ -326,10 +326,14 @@
         }
       }
 
+      // Force a fresh find every time Auto is turned on
+      if (reader) reader.pos = null;
+      foundChat = false;
+
       if (pollTimer) clearInterval(pollTimer);
       pollTimer = setInterval(tick, 350);
       setStatus('Auto ON – looking for chat…', 'warn');
-      log('Auto-read started');
+      log('Auto-read started (v2 – with highlight)');
     }
 
     function stopAuto() {
@@ -360,6 +364,25 @@
               foundChat = true;
               setStatus('Chat found – watching…', 'ok');
               log('Chatbox located', 'info');
+
+              // Draw a bright rectangle around the detected chat box
+              // so you can instantly confirm the app updated + found the right box
+              try {
+                const box = reader.pos.mainbox || (reader.pos.boxes && reader.pos.boxes[0]);
+                if (box && box.rect) {
+                  const r = box.rect;
+                  alt1.overLayClearGroup('zamcue-chat');
+                  alt1.overLaySetGroup('zamcue-chat');
+                  alt1.overLayRect(
+                    a1lib ? a1lib.mixColor(0, 255, 0) : 0x00FF00,
+                    r.x, r.y, r.width, r.height,
+                    4000, 4
+                  );
+                  log('Highlighted chat box (green)', 'info');
+                }
+              } catch (e) {
+                log('Highlight failed: ' + e.message, 'info');
+              }
             } else {
               setStatus('Looking for chatbox… (keep it visible)', 'warn');
               return;
