@@ -337,7 +337,7 @@
       if (pollTimer) clearInterval(pollTimer);
       pollTimer = setInterval(tick, 350);
       setStatus('Auto ON – looking for chat…', 'warn');
-      log('Auto-read started (v3 – A1lib fix)');
+      log('Auto-read started (v4 – strong highlight)');
     }
 
     function stopAuto() {
@@ -370,7 +370,7 @@
               setStatus('Chat found – watching…', 'ok');
               log('Chatbox located', 'info');
 
-              // Draw a bright rectangle around the detected chat box
+              // Draw a very obvious highlight around the detected chat box
               try {
                 let r = null;
                 if (reader.pos.mainbox && reader.pos.mainbox.rect) {
@@ -384,7 +384,10 @@
                 if (r) {
                   alt1.overLayClearGroup('zamcue-chat');
                   alt1.overLaySetGroup('zamcue-chat');
-                  alt1.overLayRect(0x00FF00, r.x, r.y, r.width, r.height, 5000, 5);
+                  // Thick bright green border + label for 8 seconds
+                  alt1.overLayRect(0x00FF00, r.x, r.y, r.width, r.height, 8000, 8);
+                  alt1.overLayTextEx('CHAT DETECTED', 0x00FF00, 22,
+                    r.x + Math.floor(r.width / 2), r.y - 18, 8000, '', true, true);
                   log('Highlighted chat box at ' + r.x + ',' + r.y + ' ' + r.width + 'x' + r.height, 'info');
                 } else {
                   log('Chat found but no rect. keys: ' + Object.keys(reader.pos).join(','), 'info');
