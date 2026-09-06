@@ -304,17 +304,21 @@
             reader = new CB();
 
             // Exact colours used by the working Zamorak Spec Tracker
-            if (typeof a1lib !== 'undefined' && a1lib.mixColor) {
+            // UMD build exposes the library as window.A1lib
+            const lib = window.A1lib || window.a1lib || null;
+            if (lib && lib.mixColor) {
               reader.readargs = reader.readargs || {};
               reader.readargs.colors = [
-                a1lib.mixColor(153, 255, 153), // Green (Zamorak's voice)
-                a1lib.mixColor(232, 4, 4),     // Red (Zamorak)
-                a1lib.mixColor(255, 255, 255), // White
-                a1lib.mixColor(127, 169, 255), // Timestamp blue
-                a1lib.mixColor(255, 0, 0),
-                a1lib.mixColor(255, 255, 0)
+                lib.mixColor(153, 255, 153), // Green (Zamorak's voice)
+                lib.mixColor(232, 4, 4),     // Red (Zamorak)
+                lib.mixColor(255, 255, 255), // White
+                lib.mixColor(127, 169, 255), // Timestamp blue
+                lib.mixColor(255, 0, 0),
+                lib.mixColor(255, 255, 0)
               ];
               log('Zamorak colours loaded (green + red)', 'info');
+            } else {
+              log('A1lib not found – colours may be limited', 'info');
             }
 
             log('ChatBoxReader created', 'info');
@@ -333,7 +337,7 @@
       if (pollTimer) clearInterval(pollTimer);
       pollTimer = setInterval(tick, 350);
       setStatus('Auto ON – looking for chat…', 'warn');
-      log('Auto-read started (v2 – with highlight)');
+      log('Auto-read started (v3 – A1lib fix)');
     }
 
     function stopAuto() {
@@ -350,9 +354,10 @@
         if (reader && typeof reader.find === 'function') {
           // Capture – try several common ways the library exposes it
           let img = null;
-          if (typeof a1lib !== 'undefined') {
-            if (a1lib.captureHoldFullRs) img = a1lib.captureHoldFullRs();
-            else if (a1lib.captureHold) img = a1lib.captureHold(0, 0, alt1.rsWidth, alt1.rsHeight);
+          const lib = window.A1lib || window.a1lib || null;
+          if (lib) {
+            if (lib.captureHoldFullRs) img = lib.captureHoldFullRs();
+            else if (lib.captureHold) img = lib.captureHold(0, 0, alt1.rsWidth, alt1.rsHeight);
           }
           if (!img && window.alt1 && alt1.captureHoldFullRs) {
             img = alt1.captureHoldFullRs();
