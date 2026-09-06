@@ -239,26 +239,37 @@
     // ========== OVERLAY BANNER ==========
     function showBanner(cueId) {
       const cue = CUES[cueId];
-      if (!cue || !window.alt1) return;
+      if (!cue || !window.alt1) {
+        log('showBanner failed – no cue or no alt1', 'info');
+        return;
+      }
 
       const now = Date.now();
-      if (lastFired[cueId] && now - lastFired[cueId] < 3000) return;
+      if (lastFired[cueId] && now - lastFired[cueId] < 2500) return;
       lastFired[cueId] = now;
 
-      alt1.overLayClearGroup('zamcue');
-      alt1.overLaySetGroup('zamcue');
+      try {
+        alt1.overLayClearGroup('zamcue');
+        alt1.overLaySetGroup('zamcue');
 
-      const [r, g, b] = cue.color;
-      const col = (r << 16) | (g << 8) | b;
+        const [r, g, b] = cue.color;
+        const col = (r << 16) | (g << 8) | b;
 
-      const cx = Math.round(alt1.rsWidth / 2);
-      const cy = Math.round(alt1.rsHeight * 0.20);
+        // Place banner higher and bigger so it’s hard to miss
+        const cx = Math.round(alt1.rsWidth / 2);
+        const cy = Math.round(alt1.rsHeight * 0.15);
 
-      alt1.overLayTextEx(cue.title, col, 42, cx, cy, cue.duration, '', true, true);
-      alt1.overLayTextEx(cue.text, 0xFFFFFF, 20, cx, cy + 52, cue.duration, '', true, true);
-      alt1.overLayRect(col, cx - 290, cy - 28, 580, 105, cue.duration, 3);
+        // Big title
+        alt1.overLayTextEx(cue.title, col, 48, cx, cy, 6000, '', true, true);
+        // Instruction
+        alt1.overLayTextEx(cue.text, 0xFFFFFF, 22, cx, cy + 55, 6000, '', true, true);
+        // Thick coloured bar behind
+        alt1.overLayRect(col, cx - 320, cy - 35, 640, 120, 6000, 6);
 
-      log('BANNER → ' + cue.title, 'hit');
+        log('BANNER → ' + cue.title, 'hit');
+      } catch (e) {
+        log('Banner overlay error: ' + (e.message || e), 'info');
+      }
     }
 
     // ========== BUTTONS + KEYS ==========
@@ -337,7 +348,7 @@
       if (pollTimer) clearInterval(pollTimer);
       pollTimer = setInterval(tick, 350);
       setStatus('Auto ON – looking for chat…', 'warn');
-      log('Auto-read started (v4 – strong highlight)');
+      log('Auto-read started (v5 – bigger banners)');
     }
 
     function stopAuto() {
